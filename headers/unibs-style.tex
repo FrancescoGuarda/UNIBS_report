@@ -1,0 +1,161 @@
+% =============================================================================
+% unibs-style.tex -- UNIBS visual identity for the document body.
+% Included through `include-in-header` by both pandoc defaults files.
+% Sources: res/reference/UNIBS_Branding-Guidelines_extract.pdf
+%   - palette primaria (Blu notte, Blu scuro, Neutro caldo, Bianco, Nero + tints)
+%   - font: Antarctica, fallback Helvetica Neue (body 10.5 pt, ragged right)
+%   - visual elements: orthogonal divider lines, rounded joints
+% Students never edit this file.
+% =============================================================================
+\makeatletter
+
+% --- Colours -----------------------------------------------------------------
+\definecolor{unibsBlue}{HTML}{27326E}      % Blu notte
+\definecolor{unibsDarkBlue}{HTML}{242C59}  % Blu scuro
+\definecolor{unibsNeutral}{HTML}{F7F5EB}   % Neutro caldo
+\definecolor{unibsBlack}{HTML}{1D1D1B}     % Nero
+% Blu notte percentage tints, sampled from the brand palette (not white mixes).
+\definecolor{unibsBlue5}{HTML}{E2DFDA}
+\definecolor{unibsBlue10}{HTML}{D6D4D4}
+\definecolor{unibsBlue20}{HTML}{BEBCC4}
+\definecolor{unibsBlue30}{HTML}{A7A5B6}
+\definecolor{unibsBlue40}{HTML}{9392AA}
+\definecolor{unibsBlue50}{HTML}{81809F}
+\definecolor{unibsBlue60}{HTML}{6F6E94}
+\definecolor{unibsBlue70}{HTML}{5E608A}
+\definecolor{unibsBlue80}{HTML}{4D5281}
+\definecolor{unibsBlue90}{HTML}{3C4579}
+
+% --- Fonts ---------------------------------------------------------------------
+% Antarctica (brand font, commercial) when installed; otherwise Helvetica Neue
+% (closest system match, ships with macOS); otherwise TeX Gyre Heros
+% (Helvetica clone shipped with TeX Live/MiKTeX, used e.g. on Windows).
+% Antarctica has no italic: a slanted upright is used, as for UNIBS documents.
+\RequirePackage{fontspec}
+\newif\ifunibs@antarctica
+\IfFontExistsTF{Antarctica}{\unibs@antarcticatrue}{}
+\ifunibs@antarctica
+  \IfFontExistsTF{Antarctica Bold}
+    {\def\unibs@bold{Antarctica Bold}}
+    {\def\unibs@bold{Antarctica}}
+  \setmainfont{Antarctica}[
+    BoldFont=\unibs@bold,
+    ItalicFont=Antarctica, ItalicFeatures={FakeSlant=0.18},
+    BoldItalicFont=\unibs@bold, BoldItalicFeatures={FakeSlant=0.18}]
+  \setsansfont{Antarctica}[
+    BoldFont=\unibs@bold,
+    ItalicFont=Antarctica, ItalicFeatures={FakeSlant=0.18},
+    BoldItalicFont=\unibs@bold, BoldItalicFeatures={FakeSlant=0.18}]
+\else
+  \IfFontExistsTF{Helvetica Neue}
+    {\setmainfont{Helvetica Neue}\setsansfont{Helvetica Neue}}
+    {\setmainfont{TeX Gyre Heros}\setsansfont{TeX Gyre Heros}%
+     \PackageWarningNoLine{unibs}{Neither Antarctica nor Helvetica Neue found:
+       using TeX Gyre Heros}}
+\fi
+\IfFontExistsTF{DejaVu Sans Mono}
+  {\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase]}
+  {\setmonofont{Latin Modern Mono}[Scale=MatchLowercase]}
+
+% --- Page layout, header and footer -------------------------------------------
+\RequirePackage{etoolbox}
+\RequirePackage{ragged2e}
+\RequirePackage{scrlayer-scrpage}
+\providecommand\unibsHeadLeft{}
+\providecommand\unibsStudentName{}
+\clearpairofpagestyles
+\ihead{\unibsHeadLeft}
+\ohead{\unibsStudentName}
+\ifoot{\textbf{\textcolor{unibsBlue}{Universit\`a degli Studi di Brescia}}}
+\ofoot{\pagemark}
+\setkomafont{pageheadfoot}{\footnotesize\color{unibsBlue60}}
+\setkomafont{pagenumber}{\footnotesize\bfseries\color{unibsBlue}}
+\KOMAoptions{headsepline=0.4pt, footsepline=0.4pt}
+\setkomafont{headsepline}{\color{unibsBlue10}}
+\setkomafont{footsepline}{\color{unibsBlue10}}
+\pagestyle{scrheadings}
+
+% Brand manual: body text flush left / ragged right ("bandiera sinistra").
+\AtBeginDocument{\RaggedRight\color{unibsBlack}}
+
+% --- Headings --------------------------------------------------------------------
+\setkomafont{disposition}{\bfseries\color{unibsBlue}}
+\RedeclareSectionCommand[
+  font=\fontsize{17}{21}\selectfont,
+  beforeskip=2.4\baselineskip plus .4\baselineskip,
+  afterskip=.9\baselineskip]{section}
+\RedeclareSectionCommand[
+  font=\fontsize{13}{16}\selectfont,
+  beforeskip=1.6\baselineskip plus .3\baselineskip,
+  afterskip=.5\baselineskip]{subsection}
+\RedeclareSectionCommand[
+  font=\fontsize{10.5}{13}\selectfont,
+  beforeskip=1.2\baselineskip plus .2\baselineskip,
+  afterskip=.3\baselineskip]{subsubsection}
+\renewcommand*\sectionformat{\textcolor{unibsBlue40}{\thesection}\hskip .7em}
+\renewcommand*\subsectionformat{\textcolor{unibsBlue40}{\thesubsection}\hskip .6em}
+\renewcommand*\subsubsectionformat{\textcolor{unibsBlue40}{\thesubsubsection}\hskip .5em}
+% Level-1 headings open with a divider line (brand "linee divisorie").
+% \unibsNoSectionLine drops it for the next section only: the compendium
+% filter emits it when a report starts with a section right after its cover,
+% where the line would separate nothing.
+\newif\ifunibs@nosecline
+\newcommand\unibsNoSectionLine{\global\unibs@noseclinetrue}
+\renewcommand*\sectionlinesformat[4]{%
+  \ifstrequal{#1}{section}{%
+    \ifunibs@nosecline
+      \global\unibs@noseclinefalse
+    \else
+      {\color{unibsBlue10}\rule[.5\baselineskip]{\linewidth}{.5pt}}\par\nobreak
+      \vspace{-.15\baselineskip}%
+    \fi}{}%
+  \@hangfrom{\hskip #2#3}{#4}}
+
+% --- Lists ------------------------------------------------------------------------
+\RequirePackage{enumitem}
+\setlist{itemsep=.25em, topsep=.4em}
+\setlist[itemize,1]{label=\textcolor{unibsBlue}{\small\textbullet}}
+\setlist[itemize,2]{label=\textcolor{unibsBlue40}{\textendash}}
+\setlist[itemize,3]{label=\textcolor{unibsBlue40}{\small\textbullet}}
+\setlist[enumerate,1]{label=\textcolor{unibsBlue}{\bfseries\arabic*.}}
+\setlist[enumerate,2]{label=\textcolor{unibsBlue}{\alph*)}}
+
+% --- Captions, figures, tables ------------------------------------------------
+\RequirePackage{caption}
+\captionsetup{font={small}, labelfont={bf,color=unibsBlue}, textfont={color=unibsBlue80},
+  labelsep=period, justification=raggedright, singlelinecheck=true}
+\captionsetup[table]{skip=6pt}
+\RequirePackage{booktabs}
+\RequirePackage{longtable}
+\RequirePackage{colortbl}
+\AtBeginDocument{\arrayrulecolor{unibsBlue}}
+\setlength\heavyrulewidth{.8pt}
+\setlength\lightrulewidth{.4pt}
+\AtBeginEnvironment{longtable}{\small}
+% Header cells: the Lua filter inserts \unibsTableHead at the start of each cell.
+\newcommand\unibsTableHead{\bfseries\color{unibsBlue}}
+
+% --- Quotes and code ----------------------------------------------------------------
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\renewenvironment{quote}
+  {\begin{tcolorbox}[blanker, breakable, left=5mm, top=1mm, bottom=1mm,
+     borderline west={2pt}{0pt}{unibsBlue20}, before skip=.6\baselineskip,
+     after skip=.6\baselineskip]\color{unibsBlue80}}
+  {\end{tcolorbox}}
+% Every code block is wrapped in `unibscode` by the Lua filter.
+\newtcolorbox{unibscode}{enhanced, breakable, colback=unibsNeutral, colframe=unibsNeutral,
+  boxrule=0pt, arc=1.5mm, left=3mm, right=3mm, top=1.5mm, bottom=1.5mm,
+  borderline west={2pt}{0pt}{unibsBlue}, fontupper=\small,
+  before skip=.6\baselineskip, after skip=.8\baselineskip}
+\AtBeginDocument{%
+  \@ifundefined{Shaded}{}{\renewenvironment{Shaded}{}{}}%
+  \let\unibs@texttt\texttt
+  \renewcommand\texttt[1]{\textcolor{unibsBlue}{\unibs@texttt{#1}}}}
+
+% --- Misc ---------------------------------------------------------------------
+\renewcommand\footnoterule{{\color{unibsBlue10}\rule{.3\linewidth}{.4pt}}\vspace{2pt}}
+\deffootnote{1.2em}{1em}{\textcolor{unibsBlue}{\thefootnotemark}\hskip .4em}
+\AtBeginDocument{\urlstyle{same}}
+
+\makeatother

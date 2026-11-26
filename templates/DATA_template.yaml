@@ -1,0 +1,44 @@
+# =============================================================================
+# DATA_template.yaml — modello dei dati ricorrenti della borsa di ricerca
+# -----------------------------------------------------------------------------
+# Copialo nella radice del progetto come DATA.yaml e compilalo lì.
+# DATA.yaml è l'unica fonte dei dati ripetuti: copertine e blocco "info
+# personali" li leggono da qui, quindi non vanno mai riscritti nei report.
+# - Sostituisci ogni valore «…» (simboli « » compresi) con il dato reale.
+# - Lascia le virgolette "…" attorno ai valori; non rinominare le chiavi.
+# - I valori accettano Markdown inline (es. *corsivo*).
+# - Finché resta un «placeholder», il rendering lo segnala nel terminale.
+# - I percorsi (es. company.logo) sono relativi alla cartella di DATA.yaml.
+# =============================================================================
+
+academic-year: "«2026/2027»"             # anno accademico (copertina del compendio)
+
+scholarship:
+  type: "Borsa di ricerca"               # tipologia, mostrata sulle copertine
+  title: "«Titolo della borsa di ricerca»"
+
+student:
+  name: "«Nome Cognome»"
+  role: "«Qualifica / corso di studi»"
+  email: "«nome.cognome@unibs.it»"       # opzionale: cancella la riga se non serve
+  # department: "«Dipartimento di …»"    # opzionale: solo se diverso da department.name
+
+supervisors:                             # uno o più supervisori (ripeti il blocco "- name/role")
+  - name: "«Prof. Nome Cognome»"
+    role: "«Ruolo accademico»"
+    # email: "«nome.cognome@unibs.it»"   # opzionale
+    # department: "«Dipartimento di …»"  # opzionale: solo se diverso da department.name
+
+department:                              # dipartimento di studente e supervisori
+  name: "«Dipartimento di …»"
+  university: "Università degli Studi di Brescia"
+
+company:                                 # azienda affiliata
+  name: "«Nome azienda»"
+  url: "«https://www.esempio.com»"       # opzionale
+  # logo: "res/logo-azienda.svg"         # opzionale: SVG, PDF o PNG (vedi README)
+  tutor:                                 # opzionale: referente aziendale
+    name: "«Nome Cognome»"
+    role: "«Ruolo in azienda»"
+    # email: "«nome.cognome@esempio.com»"  # opzionale
+    # department: "«Area o funzione»"    # opzionale: reparto in azienda

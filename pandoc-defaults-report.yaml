@@ -1,0 +1,45 @@
+# =============================================================================
+# pandoc-defaults-report.yaml -- single weekly report (cover + info + body).
+#
+#   pandoc weekly-reports/YY-MM-DD.md --defaults=pandoc-defaults-report.yaml \
+#          -o weekly_reports_pdf/YY-MM-DD.pdf
+#
+# "${.}" = directory of this file, so filters, preambles and DATA.yaml are found
+# from any working directory (project root, weekly-reports/ for the VS Code
+# Pandoc plugin, ...). Input/output paths on the command line and image paths
+# in the Markdown are resolved from the working directory (see resource-path).
+# =============================================================================
+from: markdown
+to: latex
+pdf-engine: lualatex          # fontspec + system fonts (Antarctica/Helvetica Neue) on macOS and Windows
+standalone: true
+number-sections: true
+
+metadata-files:
+  - "${.}/DATA.yaml"
+metadata:
+  lang: it-IT
+
+# Images: relative to the working directory, weekly-reports/ or templates/.
+resource-path:
+  - "."
+  - "${.}/weekly-reports"
+  - "${.}/templates"
+
+filters:
+  - "${.}/headers/report.lua"
+include-in-header:
+  - "${.}/headers/unibs-style.tex"
+  - "${.}/headers/unibs-covers.tex"
+
+variables:
+  documentclass: scrartcl
+  classoption: [fontsize=10.5pt, paper=a4, oneside, parskip=half-]
+  geometry: [a4paper, top=35mm, bottom=35mm, left=35mm, right=35mm,
+             headsep=8mm, footskip=14mm]
+  linestretch: 1.15
+  colorlinks: true
+  linkcolor: unibsBlue
+  urlcolor: unibsBlue
+  citecolor: unibsBlue
+  toccolor: unibsBlue

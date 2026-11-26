@@ -1,0 +1,227 @@
+% =============================================================================
+% unibs-covers.tex -- covers and "personal info" block.
+% Included through `include-in-header` by both pandoc defaults files.
+%
+% Layout grid (brand manual, "Griglia e composizione"): A4 split into 12
+% square modules horizontally, X = 17.5 mm; text and logo aligned to the grid.
+% Backgrounds are res/bg-*.pdf, rendered from the SVG sources in res/.
+%
+% Data macros (\unibsStudentName, \unibsResDir, ...) are defined at the start
+% of the body by the Lua filters, reading DATA.yaml. Students never edit this.
+% =============================================================================
+\makeatletter
+\RequirePackage{graphicx}
+\RequirePackage{eso-pic}
+\RequirePackage{tikz}
+
+% =============================================================================
+% TUNING -- cover typography (README: "Regolare le copertine").
+% Sizes in pt. Edit, re-render, compare with res/reference/*.png.
+% =============================================================================
+% Leading: baseline distance = factor x font size, then multiplied by the
+% document `linestretch` (1.15 in the defaults files): 0.85 -> 0.98 x size.
+\newcommand\unibsCoverLeading{0.85}
+% Letter spacing of all cover texts, as fontspec LetterSpace (0 = the font's
+% own spacing; small positive values such as 2-5 open the text up).
+\newcommand\unibsCoverTracking{0}
+
+% Compendium cover. Title size by title length (characters), classes
+% assigned in headers/unibs-common.lua: <=40 | <=80 | <=130 | longer.
+\newcommand\unibsCcTitleSize[1]{\ifcase#1\or 58\or 47\or 38\or 31\fi}
+\newcommand\unibsCcScholarshipSize{23}  % scholarship title
+\newcommand\unibsCcStudentSize{15}      % student name
+\newcommand\unibsCcDetailSize{12}       % department, "in collaborazione con ..."
+\newcommand\unibsCcLabelSize{16}        % label (scholarship type, e.g. BORSA DI RICERCA)
+\newcommand\unibsCcPeriodSize{16}       % period
+\newcommand\unibsCcYearSize{20}         % academic year (vertical)
+\newcommand\unibsCcDateSize{10}         % compilation date
+
+% Weekly cover. Title classes: <=70 | <=120 | <=200 | longer.
+\newcommand\unibsWcTitleSize[1]{\ifcase#1\or 45\or 36\or 29\or 25\fi}
+\newcommand\unibsWcLabelSize{15}        % REPORT SETTIMANALE
+\newcommand\unibsWcDateSize{22}         % date and period
+\newcommand\unibsWcStudentSize{17}      % student name (lower band)
+\newcommand\unibsWcScholarshipSize{11.5}% scholarship (lower band)
+
+% =============================================================================
+
+\newif\ifunibscompendium   % set true by unibs-compendium.tex
+\newlength\unibsX \setlength\unibsX{17.5mm}
+
+% Defaults, overridden by the filter-generated data block.
+% (plain \def, not \providecommand: tests use \ifx against \@empty)
+\def\unibsResDir{res}
+\def\unibsScholarshipType{Borsa di ricerca}
+\def\unibsScholarshipTitle{}
+\def\unibsAcademicYear{}
+\def\unibsDepartmentName{}
+\def\unibsCompanyName{}
+\def\unibsReportLabel{Report settimanale}
+
+% The pandoc template calls \maketitle when `title` is set (kept for the PDF
+% metadata); covers are emitted explicitly by the filters instead.
+\renewcommand\maketitle{}
+
+% Text helpers --------------------------------------------------------------
+\newcommand\unibs@size[2]{\fontsize{#1}{#2}\selectfont}
+% Cover text size: #1 in pt, leading from \unibsCoverLeading.
+\newcommand\unibs@csize[1]{%
+  \fontsize{#1}{\dimexpr\unibsCoverLeading\dimexpr #1pt\relax\relax}\selectfont}
+\newcommand\unibs@label[1]{\MakeUppercase{#1}}
+\newcommand\unibs@nohyph{\hyphenpenalty=10000\exhyphenpenalty=10000\raggedright}
+\newcommand\unibs@coverfont{%
+  \ifdim\unibsCoverTracking pt=0pt\else
+    \addfontfeatures{LetterSpace=\unibsCoverTracking}\fi}
+
+% Full-page background + foreground overlay for the current page.
+% #1 background PDF (basename in \unibsResDir), #2 TikZ code (mm, y downwards).
+\newcommand\unibs@coverpage[2]{%
+  \AddToShipoutPictureBG*{\AtPageLowerLeft{%
+    \includegraphics[width=\paperwidth,height=\paperheight]{\unibsResDir/#1}}}%
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \begin{tikzpicture}[overlay, x=1mm, y=-1mm,
+        every node/.style={inner sep=0pt, outer sep=0pt, anchor=north west,
+          font=\unibs@coverfont,
+          execute at begin node={\setlength\parskip{0pt}}}]
+      #2
+    \end{tikzpicture}}}%
+  \thispagestyle{empty}\null}
+
+% --- Weekly-report cover -----------------------------------------------------
+% \unibsWeeklyCover[<title size class 1-4>]{<title>}{<date>}{<period>}
+% In the compendium it also adds the TOC/bookmark entry and resets counters.
+\newcommand\unibsWeeklyCover[4][1]{%
+  \clearpage
+  \ifunibscompendium
+    \setcounter{section}{0}\setcounter{figure}{0}%
+    \setcounter{table}{0}\setcounter{footnote}{0}\setcounter{equation}{0}%
+    \phantomsection
+    \addcontentsline{toc}{unibsreport}{\protect\numberline{#3}#2}%
+  \else
+    \pagenumbering{roman}%
+  \fi
+  \gdef\unibsHeadLeft{\unibsReportLabel\enskip\textperiodcentered\enskip #3}%
+  \unibs@coverpage{bg-weekly-cover.pdf}{%
+    \node at (17.5,17.5)
+      {\includegraphics[height=\unibsX]{\unibsResDir/logo-unibs.pdf}};
+    % title + label: from 4X, inside the column left of the 11X divider
+    \node[text width=164mm, align=left, text=unibsBlue] at (17.5,70) {%
+      \unibs@nohyph\unibs@csize{\unibsWcTitleSize{#1}}\bfseries #2\par
+      \vspace{2.5mm}%
+      \unibs@csize{\unibsWcLabelSize}\color{unibsBlue40}\unibs@label{\unibsReportLabel}\par};
+    % date and period: from 12X
+    \node[text width=164mm, align=left] at (17.5,210) {%
+      \unibs@csize{\unibsWcDateSize}\color{unibsBlue}#3\par
+      \color{unibsBlue40}#4\par};
+    % lower band: student and scholarship, from 15X
+    \node[text width=164mm, align=left] at (17.5,260) {%
+      \unibs@csize{\unibsWcStudentSize}\bfseries\color{unibsBlue}\unibsStudentName\par
+      \vspace{1.5mm}%
+      \unibs@csize{\unibsWcScholarshipSize}\mdseries\color{unibsBlue60}%
+      \unibsScholarshipType\ifx\unibsScholarshipTitle\@empty\else\
+        \textendash\ \unibsScholarshipTitle\fi\par};
+  }%
+  \clearpage
+  \ifunibscompendium\else\pagenumbering{arabic}\fi}
+
+% --- Compendium cover ------------------------------------------------------------
+% \unibsCompendiumCover[<title size class 1-4>]{<title>}{<period>}{<date>}
+\newcommand\unibsCompendiumCover[4][1]{%
+  \clearpage
+  \pagenumbering{roman}%
+  \gdef\unibsHeadLeft{#2}%
+  \unibs@coverpage{bg-compendium-cover.pdf}{%
+    % title: from (1X, 1X), left of the 9X divider
+    \node[text width=131mm, align=left, text=unibsNeutral] at (17.5,17.5) {%
+      \unibs@nohyph\unibs@csize{\unibsCcTitleSize{#1}}\bfseries #2\par};
+    % academic year, vertical, in the right column (11X-12X)
+    \node[rotate=90, anchor=base east, text=unibsBlue40] at (200,17.5)
+      {\unibs@csize{\unibsCcYearSize}\ifx\unibsAcademicYear\@empty\else A.A.\ \unibsAcademicYear\fi};
+    % scholarship title, student, department, company: from 8X
+    \node[text width=131mm, align=left, text=unibsNeutral] at (17.5,140) {%
+      \unibs@nohyph\unibs@csize{\unibsCcScholarshipSize}\unibsScholarshipTitle\par
+      \vspace{7mm}%
+      \unibs@csize{\unibsCcStudentSize}\bfseries\unibsStudentName\par
+      \vspace{1.5mm}%
+      \unibs@csize{\unibsCcDetailSize}\mdseries\color{unibsBlue40}%
+      \unibsDepartmentName\par
+      \ifx\unibsCompanyName\@empty\else in collaborazione con \unibsCompanyName\par\fi};
+    % label + period: above the 14X divider
+    \node[text width=131mm, align=left, anchor=south west] at (17.5,238) {%
+      \unibs@csize{\unibsCcLabelSize}\bfseries\color{unibsBlue40}\unibs@label{\unibsScholarshipType}\par
+      \vspace{1mm}%
+      \unibs@csize{\unibsCcPeriodSize}\mdseries\color{unibsNeutral}#3\par};
+    % negative logo: (1X, 15X)
+    \node at (17.5,262.5)
+      {\includegraphics[height=\unibsX]{\unibsResDir/logo-unibs-negative.pdf}};
+    % compilation date, bottom of the tone-on-tone area
+    \node[anchor=base west, text=unibsBlue40] at (166.25,278.5)
+      {\unibs@csize{\unibsCcDateSize}#4};
+  }%
+  \clearpage
+  \pagenumbering{arabic}}
+
+% --- Personal-info block -------------------------------------------------------
+% Two columns, each headed by its logo: UNIBS people on the left (student,
+% supervisors), the affiliated company on the right (tutor). Each person is a
+% signature as in res/reference/Entity_rendering_example.png:
+%   name / role  -  contacts  -  department (muted) / institution
+% Logos follow the cobranding rules (brand manual, "Cobranding"): marks on the
+% same central axis, balanced heights, 1 pt vertical divider between them with
+% clear space on both sides. Emitted by the filters from DATA.yaml:
+%   \begin{unibsinfo}
+%     \unibsInfoLogos{<left mark>}{<right mark>}
+%     \unibsInfoColumns{<left people>}{<right people>}
+%   \end{unibsinfo}
+\newlength\unibsInfoLogoHeight \setlength\unibsInfoLogoHeight{13mm} % UNIBS mark
+\newlength\unibs@gutter \setlength\unibs@gutter{12mm} % > 2 x 2X clear space
+\newlength\unibs@colw
+\newcommand\unibs@vcenter[1]{\raisebox{-.5\height}{#1}}
+
+\newenvironment{unibsinfo}
+  {\par\vspace*{1mm}\setlength\parskip{0pt}\linespread{1}\selectfont
+   \setlength\unibs@colw{\dimexpr(\linewidth-\unibs@gutter)/2\relax}}
+  {\par\vspace{2mm}}
+
+\newcommand\unibsInfoLogos[2]{%
+  \par\noindent
+  \makebox[\unibs@colw][l]{\unibs@vcenter{#1}}\hfill
+  \if\relax\detokenize{#2}\relax\else
+    \unibs@vcenter{\textcolor{unibsBlack}{\rule{1pt}{\unibsInfoLogoHeight}}}\fi
+  \hfill\makebox[\unibs@colw][l]{\unibs@vcenter{#2}}\par
+  \vspace{8mm}}
+\newcommand\unibsInfoUnibsLogo{%
+  \includegraphics[height=\unibsInfoLogoHeight]{\unibsResDir/logo-unibs.pdf}}
+% Partner mark, optically balanced by area: it covers \unibsInfoPartnerArea
+% times the area of the UNIBS mark (aspect 2.64:1), never taller than the
+% UNIBS mark nor wider than its column. Wide wordmarks get shorter, compact
+% marks taller, so any company logo works without per-logo settings.
+\newcommand\unibsInfoPartnerArea{0.5}
+\newsavebox\unibs@logobox
+\newcommand\unibsInfoPartnerLogo[1]{%
+  \sbox\unibs@logobox{\includegraphics[height=100pt]{#1}}%
+  \edef\unibs@scale{\fpeval{min(1, sqrt(\unibsInfoPartnerArea * 2.64
+    / (\the\wd\unibs@logobox / 100pt)))}}%
+  \includegraphics[height=\unibs@scale\unibsInfoLogoHeight, width=\unibs@colw,
+    keepaspectratio]{#1}}
+% No logo file: the company name stands in for the mark.
+\newcommand\unibsInfoPartnerName[1]{%
+  \parbox{\unibs@colw}{\raggedright\unibs@size{14}{16}\bfseries\color{unibsBlue}#1}}
+
+\newcommand\unibsInfoColumns[2]{%
+  \par\noindent
+  \begin{minipage}[t]{\unibs@colw}\raggedright #1\end{minipage}\hfill
+  \begin{minipage}[t]{\unibs@colw}\raggedright #2\end{minipage}\par}
+
+% Signature parts (sizes and leading after the brand examples: name 1.3x the
+% detail size, detail leading 1.3, one blank line between groups).
+\newcommand\unibsInfoLabel[1]{%
+  {\unibs@size{7.5}{9}\bfseries\color{unibsBlue}\unibs@label{#1}\par}\vspace{2.5mm}}
+\newcommand\unibsInfoName[1]{%
+  {\unibs@size{12.5}{16}\bfseries\color{unibsBlue}#1\par}}
+\newcommand\unibsInfoText[1]{{\unibs@size{9.5}{12.4}\color{unibsBlue}#1\par}}
+\newcommand\unibsInfoMuted[1]{{\unibs@size{9.5}{12.4}\color{unibsBlue40}#1\par}}
+\newcommand\unibsInfoGap{\vspace{12.4pt}}  % blank line between groups
+\newcommand\unibsInfoNext{\vspace{9mm}}    % between people in a column
+
+\makeatother

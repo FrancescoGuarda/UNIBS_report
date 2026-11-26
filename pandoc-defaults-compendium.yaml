@@ -1,0 +1,47 @@
+# =============================================================================
+# pandoc-defaults-compendium.yaml -- compendium: compendium cover + info + TOC
+# + every weekly-reports/YY-MM-DD.md (chronological), each with its own cover.
+#
+#   pandoc --defaults=pandoc-defaults-compendium.yaml
+#
+# Input (cover.md) and output are set here; the report list is built
+# by headers/compendium.lua. "${.}" = directory of this file.
+# =============================================================================
+from: markdown
+to: latex
+pdf-engine: lualatex
+standalone: true
+number-sections: true
+
+input-files:
+  - "${.}/cover.md"
+output-file: "${.}/weekly_reports_pdf/compendio.pdf"
+
+metadata-files:
+  - "${.}/DATA.yaml"
+metadata:
+  lang: it-IT
+
+resource-path:
+  - "."
+  - "${.}/weekly-reports"
+  - "${.}/templates"
+
+filters:
+  - "${.}/headers/compendium.lua"
+include-in-header:
+  - "${.}/headers/unibs-style.tex"
+  - "${.}/headers/unibs-covers.tex"
+  - "${.}/headers/unibs-compendium.tex"
+
+variables:
+  documentclass: scrartcl
+  classoption: [fontsize=10.5pt, paper=a4, oneside, parskip=half-]
+  geometry: [a4paper, top=35mm, bottom=35mm, left=35mm, right=35mm,
+             headsep=8mm, footskip=14mm]
+  linestretch: 1.15
+  colorlinks: true
+  linkcolor: unibsBlue
+  urlcolor: unibsBlue
+  citecolor: unibsBlue
+  toccolor: unibsBlue

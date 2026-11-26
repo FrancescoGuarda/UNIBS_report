@@ -1,0 +1,14 @@
+{
+  // vscode-pandoc (chrischinchilla.vscode-pandoc): "Pandoc Render" on a file in
+  // weekly-reports/. The plugin runs pandoc from the file's folder, hence "../".
+  "pandoc.pdfOptString": "--defaults=../pandoc-defaults-report.yaml",
+  "pandoc.outputFolder": "../weekly_reports_pdf",
+  // The plugin resolves the relative output folder against VS Code's own
+  // working directory for these two features: disable them.
+  "pandoc.render.confirmOverwrite": false,
+  "pandoc.render.openViewer": false,
+  "[markdown]": {
+    "pandoc.defaultOutputFormat": "pdf"
+  },
+  "files.encoding": "utf8"
+}

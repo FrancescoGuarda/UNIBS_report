@@ -1,0 +1,27 @@
+% =============================================================================
+% unibs-compendium.tex -- compendium-only settings (table of contents).
+% Included through `include-in-header` by pandoc-defaults-compendium.yaml only.
+% The TOC lists each weekly report (date | title) with its level-1 sections.
+% =============================================================================
+\makeatletter
+\unibscompendiumtrue
+\setcounter{tocdepth}{1}
+
+% New TOC level for reports, between \part (-1) and \section (1).
+\providecommand*\toclevel@unibsreport{0}
+\DeclareTOCStyleEntry[
+  level=0, indent=0pt, numwidth=38mm,
+  beforeskip=1.1em plus 1pt,
+  entryformat=\bfseries\color{unibsBlue},
+  entrynumberformat=\unibs@tocdate,
+  pagenumberformat=\bfseries\color{unibsBlue},
+  linefill=\hfill]{tocline}{unibsreport}
+\newcommand\unibs@tocdate[1]{\mdseries\color{unibsBlue40}#1}
+
+\RedeclareSectionCommand[
+  tocindent=38mm, tocnumwidth=2em,
+  tocentryformat=\mdseries\color{unibsBlack},
+  tocpagenumberformat=\mdseries\color{unibsBlue60},
+  toclinefill={\TOCLineLeaderFill[\textcolor{unibsBlue20}{.}]}]{section}
+
+\makeatother

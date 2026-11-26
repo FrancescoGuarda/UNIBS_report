@@ -1,0 +1,77 @@
+{
+  // UNIBS weekly-report suite: entry points (Terminal > Run Task...).
+  // "process" tasks run pandoc directly: same behaviour on Windows and macOS.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "UNIBS: PDF del report corrente",
+      "detail": "Rende il file .md aperto in weekly_reports_pdf/ (Cmd/Ctrl+Shift+B)",
+      "type": "process",
+      "command": "pandoc",
+      "args": ["lua", "${workspaceFolder}/scripts/unibs.lua", "report", "${file}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "UNIBS: PDF del compendio",
+      "detail": "Copertina compendio + tutti i report in ordine cronologico",
+      "type": "process",
+      "command": "pandoc",
+      "args": ["lua", "${workspaceFolder}/scripts/unibs.lua", "compendium"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "UNIBS: tutti i PDF",
+      "detail": "Ogni report YY-MM-DD.md + compendio",
+      "type": "process",
+      "command": "pandoc",
+      "args": ["lua", "${workspaceFolder}/scripts/unibs.lua", "all"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "UNIBS: nuovo report",
+      "detail": "Crea weekly-reports/YY-MM-DD.md dal template (data richiesta, default oggi)",
+      "type": "process",
+      "command": "pandoc",
+      "args": ["lua", "${workspaceFolder}/scripts/unibs.lua", "new", "${input:reportDate}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "UNIBS: nuova copertina compendio",
+      "detail": "Crea cover.md da templates/cover_template.md (si ferma se cover.md esiste già)",
+      "type": "process",
+      "command": "pandoc",
+      "args": ["lua", "${workspaceFolder}/scripts/unibs.lua", "cover"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "UNIBS: rigenera asset grafici (SVG → PDF)",
+      "detail": "Converte res/*.svg (sfondi copertine, loghi) nei PDF usati da LaTeX; serve rsvg-convert",
+      "type": "process",
+      "command": "pandoc",
+      "args": ["lua", "${workspaceFolder}/scripts/unibs.lua", "assets"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "reportDate",
+      "type": "promptString",
+      "description": "Data del report (YY-MM-DD)"
+    }
+  ]
+}

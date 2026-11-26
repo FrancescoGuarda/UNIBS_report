@@ -1,0 +1,39 @@
+# =============================================================================
+# The repository holds the suite and the templates only. Every student's own
+# data stays local: each clone creates it from templates/ (see README, USAGE 0).
+# =============================================================================
+
+# --- Student data (real values) ------------------------------------------------
+/DATA.yaml
+/cover.md
+
+# Weekly reports and their images (the folders are kept through .gitkeep)
+/weekly-reports/*
+!/weekly-reports/img/
+/weekly-reports/img/*
+!/weekly-reports/img/.gitkeep
+
+# Rendered PDFs
+/weekly_reports_pdf/*
+!/weekly_reports_pdf/.gitkeep
+
+# Affiliated-company logos (company.logo in DATA.yaml); UNIBS marks are versioned
+/res/logo-*
+!/res/logo-unibs.svg
+!/res/logo-unibs.pdf
+!/res/logo-unibs-negative.svg
+!/res/logo-unibs-negative.pdf
+/res/reference/*
+
+# --- Local notes and debug output ---------------------------------------------
+/correction.md
+/debug.tex
+*.aux
+*.log
+*.out
+*.toc
+
+# --- OS / editor clutter --------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
