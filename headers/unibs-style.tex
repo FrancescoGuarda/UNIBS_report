@@ -31,25 +31,37 @@
 % (closest system match, ships with macOS); otherwise TeX Gyre Heros
 % (Helvetica clone shipped with TeX Live/MiKTeX, used e.g. on Windows).
 % Antarctica has no italic: a slanted upright is used, as for UNIBS documents.
+%
+% Besides regular (series m) and bold (b), every installed weight of the family
+% is registered for the cover tuning (\unibsCoverStyle in unibs-covers.tex):
+% "<family> <weight>" -> NFSS series, e.g. "Helvetica Neue Light" -> l.
 \RequirePackage{fontspec}
+\def\unibs@faces{}
+\newcommand\unibs@face[3]{% #1 family, #2 NFSS series, #3 weight name
+  \IfFontExistsTF{#1 #3}
+    {\edef\unibs@faces{\unibs@faces FontFace={#2}{n}{Font={#1 #3}},}}{}}
+\newcommand\unibs@setfonts[2]{% #1 family, #2 extra fontspec options
+  \unibs@face{#1}{ul}{UltraLight}\unibs@face{#1}{el}{Thin}%
+  \unibs@face{#1}{l}{Light}\unibs@face{#1}{sb}{Medium}%
+  \unibs@face{#1}{ub}{Black}%
+  \edef\unibs@next{%
+    \noexpand\setmainfont{#1}[#2\unibs@faces]%
+    \noexpand\setsansfont{#1}[#2\unibs@faces]}%
+  \unibs@next}
 \newif\ifunibs@antarctica
 \IfFontExistsTF{Antarctica}{\unibs@antarcticatrue}{}
 \ifunibs@antarctica
   \IfFontExistsTF{Antarctica Bold}
     {\def\unibs@bold{Antarctica Bold}}
     {\def\unibs@bold{Antarctica}}
-  \setmainfont{Antarctica}[
+  \unibs@setfonts{Antarctica}{%
     BoldFont=\unibs@bold,
     ItalicFont=Antarctica, ItalicFeatures={FakeSlant=0.18},
-    BoldItalicFont=\unibs@bold, BoldItalicFeatures={FakeSlant=0.18}]
-  \setsansfont{Antarctica}[
-    BoldFont=\unibs@bold,
-    ItalicFont=Antarctica, ItalicFeatures={FakeSlant=0.18},
-    BoldItalicFont=\unibs@bold, BoldItalicFeatures={FakeSlant=0.18}]
+    BoldItalicFont=\unibs@bold, BoldItalicFeatures={FakeSlant=0.18},}
 \else
   \IfFontExistsTF{Helvetica Neue}
-    {\setmainfont{Helvetica Neue}\setsansfont{Helvetica Neue}}
-    {\setmainfont{TeX Gyre Heros}\setsansfont{TeX Gyre Heros}%
+    {\unibs@setfonts{Helvetica Neue}{}}
+    {\unibs@setfonts{TeX Gyre Heros}{}%
      \PackageWarningNoLine{unibs}{Neither Antarctica nor Helvetica Neue found:
        using TeX Gyre Heros}}
 \fi

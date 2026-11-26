@@ -14,35 +14,78 @@
 \RequirePackage{eso-pic}
 \RequirePackage{tikz}
 
+% --- Cover text styles ---------------------------------------------------------
+% Defined before TUNING, which uses them. Weight names -> NFSS series; the
+% faces behind them are registered in unibs-style.tex.
+\@namedef{unibs@w@ultralight}{ul}
+\@namedef{unibs@w@thin}{el}
+\@namedef{unibs@w@light}{l}
+\@namedef{unibs@w@regular}{m}
+\@namedef{unibs@w@medium}{sb}
+\@namedef{unibs@w@bold}{b}
+\@namedef{unibs@w@black}{ub}
+\newcommand\unibsCoverStyle[5]{%
+  \ifcsname unibs@w@#4\endcsname\else
+    \PackageError{unibs}{Unknown cover weight `#4' for #1}
+      {Use ultralight, thin, light, regular, medium, bold or black.}\fi
+  \@namedef{unibs@cs@#1@size}{#2}%
+  \@namedef{unibs@cs@#1@leading}{#3}%
+  \expandafter\edef\csname unibs@cs@#1@series\endcsname{\csname unibs@w@#4\endcsname}%
+  \@namedef{unibs@cs@#1@tracking}{#5}}
+% Item #2 of the comma list stored in the macro named #1; the last item when
+% the list is shorter.
+\ExplSyntaxOn
+\cs_new:Npn \unibs_pick:nn #1#2
+  { \clist_item:nn {#1} { \int_min:nn {#2} { \clist_count:n {#1} } } }
+\cs_generate_variant:Nn \unibs_pick:nn { v }
+\cs_set_eq:NN \unibs@pick \unibs_pick:vn
+\ExplSyntaxOff
+% \unibs@style[<size class>]{<element>}: selects size, leading, weight and
+% tracking of a cover element (from \normalfont, so nothing leaks between
+% elements of the same node).
+\newcommand\unibs@style[2][1]{%
+  \edef\unibs@sz{\unibs@pick{unibs@cs@#2@size}{#1}}%
+  \normalfont
+  \fontsize{\unibs@sz pt}%
+    {\fpeval{\csname unibs@cs@#2@leading\endcsname * \unibs@sz}pt}%
+  \fontseries{\csname unibs@cs@#2@series\endcsname}\selectfont
+  \ifdim\csname unibs@cs@#2@tracking\endcsname pt=0pt\else
+    \addfontfeatures{LetterSpace=\csname unibs@cs@#2@tracking\endcsname}\fi}
+
 % =============================================================================
 % TUNING -- cover typography (README: "Regolare le copertine").
-% Sizes in pt. Edit, re-render, compare with res/reference/*.png.
+% One row per text element of the covers:
+%   \unibsCoverStyle{<element>}{<size>}{<leading>}{<weight>}{<tracking>}
+%   size      body size in pt. Titles take one value per length class
+%             (classes assigned in headers/unibs-common.lua, see README).
+%   leading   baseline distance / size: 1 = solid, 1.2 = open. It is the
+%             actual ratio (the document linestretch does not apply here).
+%   weight    ultralight | thin | light | regular | medium | bold | black;
+%             a weight the installed font lacks falls back to the nearest
+%             one, with a LaTeX font warning.
+%   tracking  letter spacing in percent of the size (fontspec LetterSpace):
+%             0 = the font's own spacing, positive opens, negative tightens.
+%             Figma letter spacing % as is; Adobe tracking / 10.
+% Element names match the annotated figures in docs/.
 % =============================================================================
-% Leading: baseline distance = factor x font size, then multiplied by the
-% document `linestretch` (1.15 in the defaults files): 0.85 -> 0.98 x size.
-\newcommand\unibsCoverLeading{0.85}
-% Letter spacing of all cover texts, as fontspec LetterSpace (0 = the font's
-% own spacing; small positive values such as 2-5 open the text up).
-\newcommand\unibsCoverTracking{0}
-
-% Compendium cover. Title size by title length (characters), classes
-% assigned in headers/unibs-common.lua: <=40 | <=80 | <=130 | longer.
-\newcommand\unibsCcTitleSize[1]{\ifcase#1\or 58\or 47\or 38\or 31\fi}
-\newcommand\unibsCcScholarshipSize{23}  % scholarship title
-\newcommand\unibsCcStudentSize{15}      % student name
-\newcommand\unibsCcDetailSize{12}       % department, "in collaborazione con ..."
-\newcommand\unibsCcLabelSize{16}        % label (scholarship type, e.g. BORSA DI RICERCA)
-\newcommand\unibsCcPeriodSize{16}       % period
-\newcommand\unibsCcYearSize{20}         % academic year (vertical)
-\newcommand\unibsCcDateSize{10}         % compilation date
-
-% Weekly cover. Title classes: <=70 | <=120 | <=200 | longer.
-\newcommand\unibsWcTitleSize[1]{\ifcase#1\or 45\or 36\or 29\or 25\fi}
-\newcommand\unibsWcLabelSize{15}        % REPORT SETTIMANALE
-\newcommand\unibsWcDateSize{22}         % date and period
-\newcommand\unibsWcStudentSize{17}      % student name (lower band)
-\newcommand\unibsWcScholarshipSize{11.5}% scholarship (lower band)
-
+%                element         size              leading  weight     tracking
+% Compendium cover. Title classes: <=40 | <=80 | <=130 | longer characters.
+\unibsCoverStyle{CcTitle}       {58, 47, 38, 31}  {0.98}  {bold}     {0}
+\unibsCoverStyle{CcYear}        {20}              {0.98}  {regular}  {0}
+\unibsCoverStyle{CcScholarship} {23}              {0.98}  {regular}  {0}
+\unibsCoverStyle{CcStudent}     {15}              {0.98}  {bold}     {0}
+\unibsCoverStyle{CcDepartment}  {12}              {0.98}  {regular}  {0}
+\unibsCoverStyle{CcCompany}     {12}              {0.98}  {regular}  {0}
+\unibsCoverStyle{CcLabel}       {16}              {0.98}  {bold}     {0}
+\unibsCoverStyle{CcPeriod}      {16}              {0.98}  {regular}  {0}
+\unibsCoverStyle{CcDate}        {10}              {0.98}  {regular}  {0}
+% Weekly cover. Title classes: <=70 | <=120 | <=200 | longer characters.
+\unibsCoverStyle{WcTitle}       {45, 36, 29, 25}  {0.98}  {bold}     {0}
+\unibsCoverStyle{WcLabel}       {15}              {0.98}  {bold}     {0}
+\unibsCoverStyle{WcDate}        {22}              {0.98}  {regular}  {0}
+\unibsCoverStyle{WcPeriod}      {22}              {0.98}  {regular}  {0}
+\unibsCoverStyle{WcStudent}     {17}              {0.98}  {bold}     {0}
+\unibsCoverStyle{WcScholarship} {11.5}            {0.98}  {regular}  {0}
 % =============================================================================
 
 \newif\ifunibscompendium   % set true by unibs-compendium.tex
@@ -64,14 +107,8 @@
 
 % Text helpers --------------------------------------------------------------
 \newcommand\unibs@size[2]{\fontsize{#1}{#2}\selectfont}
-% Cover text size: #1 in pt, leading from \unibsCoverLeading.
-\newcommand\unibs@csize[1]{%
-  \fontsize{#1}{\dimexpr\unibsCoverLeading\dimexpr #1pt\relax\relax}\selectfont}
 \newcommand\unibs@label[1]{\MakeUppercase{#1}}
 \newcommand\unibs@nohyph{\hyphenpenalty=10000\exhyphenpenalty=10000\raggedright}
-\newcommand\unibs@coverfont{%
-  \ifdim\unibsCoverTracking pt=0pt\else
-    \addfontfeatures{LetterSpace=\unibsCoverTracking}\fi}
 
 % Full-page background + foreground overlay for the current page.
 % #1 background PDF (basename in \unibsResDir), #2 TikZ code (mm, y downwards).
@@ -81,8 +118,7 @@
   \AddToShipoutPictureFG*{\AtPageUpperLeft{%
     \begin{tikzpicture}[overlay, x=1mm, y=-1mm,
         every node/.style={inner sep=0pt, outer sep=0pt, anchor=north west,
-          font=\unibs@coverfont,
-          execute at begin node={\setlength\parskip{0pt}}}]
+          execute at begin node={\setlength\parskip{0pt}\linespread{1}}}]
       #2
     \end{tikzpicture}}}%
   \thispagestyle{empty}\null}
@@ -106,18 +142,18 @@
       {\includegraphics[height=\unibsX]{\unibsResDir/logo-unibs.pdf}};
     % title + label: from 4X, inside the column left of the 11X divider
     \node[text width=164mm, align=left, text=unibsBlue] at (17.5,70) {%
-      \unibs@nohyph\unibs@csize{\unibsWcTitleSize{#1}}\bfseries #2\par
+      \unibs@nohyph\unibs@style[#1]{WcTitle}#2\par
       \vspace{2.5mm}%
-      \unibs@csize{\unibsWcLabelSize}\color{unibsBlue40}\unibs@label{\unibsReportLabel}\par};
+      \unibs@style{WcLabel}\color{unibsBlue40}\unibs@label{\unibsReportLabel}\par};
     % date and period: from 12X
     \node[text width=164mm, align=left] at (17.5,210) {%
-      \unibs@csize{\unibsWcDateSize}\color{unibsBlue}#3\par
-      \color{unibsBlue40}#4\par};
+      \unibs@style{WcDate}\color{unibsBlue}#3\par
+      \unibs@style{WcPeriod}\color{unibsBlue40}#4\par};
     % lower band: student and scholarship, from 15X
     \node[text width=164mm, align=left] at (17.5,260) {%
-      \unibs@csize{\unibsWcStudentSize}\bfseries\color{unibsBlue}\unibsStudentName\par
+      \unibs@style{WcStudent}\color{unibsBlue}\unibsStudentName\par
       \vspace{1.5mm}%
-      \unibs@csize{\unibsWcScholarshipSize}\mdseries\color{unibsBlue60}%
+      \unibs@style{WcScholarship}\color{unibsBlue60}%
       \unibsScholarshipType\ifx\unibsScholarshipTitle\@empty\else\
         \textendash\ \unibsScholarshipTitle\fi\par};
   }%
@@ -133,30 +169,31 @@
   \unibs@coverpage{bg-compendium-cover.pdf}{%
     % title: from (1X, 1X), left of the 9X divider
     \node[text width=131mm, align=left, text=unibsNeutral] at (17.5,17.5) {%
-      \unibs@nohyph\unibs@csize{\unibsCcTitleSize{#1}}\bfseries #2\par};
+      \unibs@nohyph\unibs@style[#1]{CcTitle}#2\par};
     % academic year, vertical, in the right column (11X-12X)
     \node[rotate=90, anchor=base east, text=unibsBlue40] at (200,17.5)
-      {\unibs@csize{\unibsCcYearSize}\ifx\unibsAcademicYear\@empty\else A.A.\ \unibsAcademicYear\fi};
+      {\unibs@style{CcYear}\ifx\unibsAcademicYear\@empty\else A.A.\ \unibsAcademicYear\fi};
     % scholarship title, student, department, company: from 8X
     \node[text width=131mm, align=left, text=unibsNeutral] at (17.5,140) {%
-      \unibs@nohyph\unibs@csize{\unibsCcScholarshipSize}\unibsScholarshipTitle\par
+      \unibs@nohyph\unibs@style{CcScholarship}\unibsScholarshipTitle\par
       \vspace{7mm}%
-      \unibs@csize{\unibsCcStudentSize}\bfseries\unibsStudentName\par
+      \unibs@style{CcStudent}\unibsStudentName\par
       \vspace{1.5mm}%
-      \unibs@csize{\unibsCcDetailSize}\mdseries\color{unibsBlue40}%
-      \unibsDepartmentName\par
-      \ifx\unibsCompanyName\@empty\else in collaborazione con \unibsCompanyName\par\fi};
+      \color{unibsBlue40}%
+      \unibs@style{CcDepartment}\unibsDepartmentName\par
+      \ifx\unibsCompanyName\@empty\else
+        \unibs@style{CcCompany}in collaborazione con \unibsCompanyName\par\fi};
     % label + period: above the 14X divider
     \node[text width=131mm, align=left, anchor=south west] at (17.5,238) {%
-      \unibs@csize{\unibsCcLabelSize}\bfseries\color{unibsBlue40}\unibs@label{\unibsScholarshipType}\par
+      \unibs@style{CcLabel}\color{unibsBlue40}\unibs@label{\unibsScholarshipType}\par
       \vspace{1mm}%
-      \unibs@csize{\unibsCcPeriodSize}\mdseries\color{unibsNeutral}#3\par};
+      \unibs@style{CcPeriod}\color{unibsNeutral}#3\par};
     % negative logo: (1X, 15X)
     \node at (17.5,262.5)
       {\includegraphics[height=\unibsX]{\unibsResDir/logo-unibs-negative.pdf}};
     % compilation date, bottom of the tone-on-tone area
     \node[anchor=base west, text=unibsBlue40] at (166.25,278.5)
-      {\unibs@csize{\unibsCcDateSize}#4};
+      {\unibs@style{CcDate}#4};
   }%
   \clearpage
   \pagenumbering{arabic}}

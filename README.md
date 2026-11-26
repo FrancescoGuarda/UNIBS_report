@@ -108,6 +108,12 @@ Una riga facoltativa si elimina del tutto. Finché resta un placeholder `«…»
 ogni rendering lo segnala nel terminale elencando i campi (`[unibs] … campi
 ancora da compilare`), ma il PDF viene comunque prodotto.
 
+La prima pagina di ogni report si apre con il blocco info, interamente
+generato da `DATA.yaml`. La figura mostra, sul modello renderizzato, da quale
+chiave arriva ogni parte:
+
+![Prima pagina del report: origine dei dati del blocco info](docs/report-page.svg)
+
 Blocco info, casi particolari:
 
 - senza `company.logo`, al posto del marchio compare il nome dell'azienda;
@@ -132,7 +138,10 @@ Blocco info, casi particolari:
    ```
 
    `date` accetta anche testo libero (reso così com'è); se manca, si usa la data
-   del nome del file.
+   del nome del file. Front matter e `DATA.yaml` compongono la copertina del
+   report (i nomi `Wc…` sono le righe di stile, vedi *Regolare le copertine*):
+
+   ![Copertina del report settimanale: origine dei dati e stili](docs/cover-weekly.svg)
 3. Scrivere il corpo in Markdown, con struttura libera. Disponibili: titoli `#`,
    `##`, `###` (numerati), elenchi, tabelle con didascalia (`: Didascalia`),
    figure con didascalia (`![Didascalia](img/file.png){width=70%}`), citazioni,
@@ -147,7 +156,11 @@ renderizzabili singolarmente.
 
 Compilare `cover.md`: `title`, `period` (facoltativo), `date` (data di
 consegna, facoltativa). Il corpo è facoltativo e diventa una premessa dopo
-l'indice. Poi lanciare il comando `compendium`.
+l'indice. Poi lanciare il comando `compendium`. Gli altri dati della copertina
+arrivano da `DATA.yaml` (i nomi `Cc…` sono le righe di stile, vedi *Regolare le
+copertine*):
+
+![Copertina del compendio: origine dei dati e stili](docs/cover-compendium.svg)
 
 ### 4. Lanciare il rendering
 
@@ -200,35 +213,38 @@ eseguito** (working directory), non rispetto al file Markdown. Pertanto:
 
 ### Regolare le copertine
 
-Tutti i parametri tipografici delle copertine sono nel blocco **TUNING** in cima a
-`headers/unibs-covers.tex`. Dopo ogni modifica si rigenera un PDF e lo si
-confronta con `res/reference/main_cover_example.png` (compendio) e
-`res/reference/single_weekly_report_cover_example.png` (report).
+La tipografia delle copertine è nel blocco **TUNING** in cima a
+`headers/unibs-covers.tex`: una riga `\unibsCoverStyle` per ogni elemento di
+testo, con corpo, interlinea, peso e spaziatura propri.
 
-| Parametro | Default | Effetto |
+```latex
+%                element         size              leading  weight     tracking
+\unibsCoverStyle{CcTitle}       {58, 47, 38, 31}  {0.98}  {bold}     {0}
+\unibsCoverStyle{CcYear}        {20}              {0.98}  {regular}  {0}
+```
+
+I nomi degli elementi sono quelli delle figure in USAGE: `Cc…` per la
+copertina del compendio (USAGE 3), `Wc…` per quella del report (USAGE 2). Dopo
+ogni modifica si rigenera un PDF e lo si confronta con il precedente.
+
+| Colonna | Valori | Effetto |
 |---|---|---|
-| `\unibsCoverLeading` | `0.85` | interlinea di tutti i testi delle copertine, come frazione del corpo. Si somma al `linestretch: 1.15` dei defaults, quindi la distanza effettiva tra le righe è 0,85 × 1,15 ≈ 0,98 volte il corpo. Valori più bassi stringono le righe; sotto 0,80 ascendenti e discendenti di righe vicine iniziano a toccarsi. |
-| `\unibsCoverTracking` | `0` | spaziatura tra le lettere (`LetterSpace` di fontspec); `0` è la spaziatura standard del font, valori positivi piccoli (2–5) la aprono, negativi la stringono. |
-| `\unibsCcTitleSize{n}` | `58, 47, 38, 31` | corpo (pt) del titolo del compendio per classe di lunghezza `n` = 1–4 |
-| `\unibsCcScholarshipSize` | `23` | titolo della borsa |
-| `\unibsCcStudentSize`, `\unibsCcDetailSize` | `15`, `12` | nome dello studente; dipartimento e azienda |
-| `\unibsCcLabelSize`, `\unibsCcPeriodSize` | `16`, `16` | etichetta (es. BORSA DI RICERCA) e periodo |
-| `\unibsCcYearSize`, `\unibsCcDateSize` | `20`, `10` | anno accademico verticale, data di consegna |
-| `\unibsWcTitleSize{n}` | `45, 36, 29, 25` | corpo del titolo del report per classe di lunghezza |
-| `\unibsWcLabelSize` | `15` | etichetta REPORT SETTIMANALE |
-| `\unibsWcDateSize` | `22` | data e periodo |
-| `\unibsWcStudentSize`, `\unibsWcScholarshipSize` | `17`, `11.5` | fascia in basso: studente e borsa |
+| `size` | pt | corpo del testo. I titoli (`CcTitle`, `WcTitle`) hanno quattro valori, uno per classe di lunghezza (vedi sotto); con meno valori si usa l'ultimo. |
+| `leading` | rapporto, es. `0.98` | distanza tra le linee di base diviso il corpo: `1` = interlinea pari al corpo, valori maggiori aprono le righe. È il valore effettivo: il `linestretch` dei defaults non vale sulle copertine. Agisce tra le righe dello stesso elemento (titoli e testi che vanno a capo) e sulla distanza dall'elemento precedente nello stesso blocco. Sotto `0.85` ascendenti e discendenti di righe vicine iniziano a toccarsi. Da Figma: altezza di riga in % / 100; da Adobe: interlinea in pt / corpo. |
+| `weight` | `ultralight`, `thin`, `light`, `regular`, `medium`, `bold`, `black` | peso del font. Helvetica Neue li ha tutti tranne `black`; TeX Gyre Heros solo `regular` e `bold`. Un peso non installato ricade sul più vicino disponibile (avviso `LaTeX Font Warning` nel log); un nome fuori elenco ferma il rendering con un errore. |
+| `tracking` | numero, `0` = spaziatura del font | spaziatura tra le lettere in percentuale del corpo (`LetterSpace` di fontspec): positivi aprono, negativi stringono. Da Figma: letter spacing in % così com'è; da Adobe: tracking (millesimi di em) / 10. |
+
+Colori, stacchi verticali tra gli elementi (`\vspace{…}`) e posizioni sulla
+griglia (coordinate `at (x,y)` in mm, multipli di X = 17,5 mm, come i righelli
+delle figure) sono nelle macro `\unibsWeeklyCover` e `\unibsCompendiumCover`
+dello stesso file.
 
 Le **classi di lunghezza** dei titoli evitano che un titolo lungo esca dalla sua
 area: le soglie (in caratteri) sono in `headers/unibs-common.lua`, nelle
 chiamate a `M.title_class`. Per il report sono 70 / 120 / 200, per il compendio
 40 / 80 / 130; oltre l'ultima soglia si usa la classe 4.
 
-Gli stacchi verticali tra i blocchi di testo (`\vspace{…}` nei nodi) e le
-posizioni sulla griglia (coordinate `at (x,y)` in mm, multipli di 17,5) sono nelle
-macro `\unibsWeeklyCover` e `\unibsCompendiumCover` dello stesso file.
-
-Il **blocco info** ha due parametri nello stesso file:
+Il **blocco info** (figura in USAGE 1) ha due parametri nello stesso file:
 
 | Parametro | Default | Effetto |
 |---|---|---|
@@ -264,7 +280,8 @@ UNIBS_report/
 │   ├── bg-compendium-cover.svg/.pdf  sfondo copertina compendio
 │   ├── logo-unibs(-negative).svg/.pdf  marchio positivo / negativo
 │   ├── logo-<azienda>.svg/.pdf       logo aziendale (da company.logo)
-│   └── reference/                    materiali di riferimento (guidelines, esempi)
+│   └── reference/                    materiali di riferimento (solo in locale, esclusi da git)
+├── docs/                             figure del README (anteprime annotate dei modelli)
 ├── scripts/unibs.lua                 entry point (pandoc lua)
 ├── .vscode/                          tasks.json, settings.json, extensions.json
 └── .gitignore                        esclude i dati dello studente (vedi USAGE 0)
@@ -303,7 +320,9 @@ pandoc weekly-reports/26-11-20.md --defaults=pandoc-defaults-report.yaml -o debu
 - **Motore: LuaLaTeX.** Usa i font di sistema via `fontspec` su Windows e
   macOS senza configurazione; la scelta del font è automatica:
   Antarctica → Helvetica Neue → TeX Gyre Heros. Antarctica non ha corsivo
-  (brand manual): se usato, il corsivo è un tondo inclinato.
+  (brand manual): se usato, il corsivo è un tondo inclinato. Oltre a regular e
+  bold, ogni peso installato della famiglia (es. `Helvetica Neue Light`) è
+  registrato come serie NFSS, così le copertine possono usarlo.
 - **Lettura di `DATA.yaml`**: `metadata-files` nei defaults. I filtri Lua
   convertono i dati in macro LaTeX (`\unibsStudentName`, …) inserite all'inizio
   del corpo e generano copertine e blocco info. I preamboli `.tex` sono statici
@@ -324,8 +343,8 @@ pandoc weekly-reports/26-11-20.md --defaults=pandoc-defaults-report.yaml -o debu
     largo risulta più basso e uno compatto più alto;
   - filetto verticale da 1 pt tra i marchi, con area di rispetto di almeno 2X
     per lato.
-  Le firme seguono `res/reference/Entity_rendering_example.png` e
-  `Personal_info_example.png`:
+  Le firme seguono gli esempi di resa delle entità e delle informazioni
+  personali del brand manual:
   - nome in grassetto 1,3 volte il corpo del testo;
   - interlinea 1,3;
   - una riga vuota tra i gruppi (ruolo, contatti, affiliazione);
@@ -342,7 +361,11 @@ pandoc weekly-reports/26-11-20.md --defaults=pandoc-defaults-report.yaml -o debu
   caricato, rompendo i percorsi.
 - **Griglia e grafica**: A4 diviso in 12 moduli, X = 17,5 mm. Le linee degli
   sfondi cadono su questa griglia, con raccordi arrotondati, al massimo 3 per
-  copertina. Il marchio è alto 1X, con margine 1X.
+  copertina. Il marchio è alto 1X, con margine 1X. Il comando `assets`
+  converte gli sfondi su una pagina A4 esatta: i programmi di grafica esportano
+  il riquadro arrotondato a pixel interi (794 × 1123 invece di 793,7 × 1122,5),
+  e la differenza lascerebbe una sottile striscia bianca sui bordi destro e
+  inferiore.
   - Copertina settimanale: layout "forme e linee" su Neutro caldo.
   - Copertina del compendio: layout "monocromatico" Blu notte, con un'area
     tono-su-tono Blu scuro.
@@ -353,20 +376,23 @@ pandoc weekly-reports/26-11-20.md --defaults=pandoc-defaults-report.yaml -o debu
     divisorie in Blu notte 10% sopra i titoli di primo livello, codice su
     Neutro caldo. Le tinte percentuali sono campionate dalla palette ufficiale;
   - margini di 2X (35 mm), per righe di lunghezza leggibile.
-- **Copertine**: interlinea, corpi e spaziatura sono parametri centralizzati
-  (vedi *Regolare le copertine*). Il titolo sceglie automaticamente una classe
-  di corpo in base alla propria lunghezza.
+- **Copertine**: ogni elemento di testo ha corpo, interlinea, peso e
+  spaziatura propri, in un'unica tabella (vedi *Regolare le copertine*). Il
+  titolo sceglie automaticamente una classe di corpo in base alla propria
+  lunghezza.
 
 ## LIMITATIONS
 
 - **Antarctica** (scritto così nelle guidelines) non è stato provato perché non
   installato. Viene usato solo se il font è nel sistema con il nome di
-  famiglia `Antarctica` (e, per il grassetto, `Antarctica Bold`); con un nome
-  diverso si ricade su Helvetica Neue. Le misure delle copertine sono tarate su
+  famiglia `Antarctica` (e, per il grassetto, `Antarctica Bold`; per gli altri
+  pesi `Antarctica Light`, `Antarctica Medium`, …); con un nome diverso si
+  ricade su Helvetica Neue. Le misure delle copertine sono tarate su
   Helvetica Neue: con Antarctica conviene un controllo visivo ed eventualmente
   un ritocco dei parametri TUNING.
 - **Windows** non ha Helvetica Neue: senza Antarctica si usa TeX Gyre Heros,
-  disegno equivalente a Helvetica ma con metriche leggermente diverse.
+  disegno equivalente a Helvetica ma con metriche leggermente diverse e i soli
+  pesi regular e bold.
 - **Prima esecuzione di LuaLaTeX**: costruisce la cache dei font e può
   richiedere alcuni minuti; con MiKTeX, la prima volta scarica anche i pacchetti
   mancanti. Le esecuzioni successive richiedono pochi secondi.
@@ -387,3 +413,5 @@ pandoc weekly-reports/26-11-20.md --defaults=pandoc-defaults-report.yaml -o debu
 - **Riferimenti incrociati** ("vedi Tabella 2") non sono automatici: la
   numerazione è di LaTeX; per riferimenti etichettati servirebbe `pandoc-crossref`.
 - **Ordine del compendio**: dato dal nome `YY-MM-DD` (anni 2000–2099).
+- **Figure di `docs/`**: immagini statiche dei modelli con i valori TUNING di
+  riferimento; modifiche a TUNING o alla disposizione non vi si riflettono.

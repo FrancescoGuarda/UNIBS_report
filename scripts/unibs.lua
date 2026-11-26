@@ -13,7 +13,8 @@ Commands:
                      (default: today)
   cover              new cover.md from templates/cover_template.md
                      (fails if cover.md already exists)
-  assets             re-render res/*.svg to PDF (needs rsvg-convert)
+  assets             re-render res/*.svg to PDF (needs rsvg-convert);
+                     cover backgrounds (bg-*) on an exact A4 page
   help               this help
 
 Works from any working directory: paths are resolved from the project root
@@ -155,12 +156,41 @@ function commands.cover()
   from_template('cover_template.md', COVER)
 end
 
+--- Cover backgrounds (res/bg-*.svg) are A4 pages. Design tools export the
+--- frame rounded to whole pixels (794 x 1123 px for A4 = 793.7 x 1122.5 px at
+--- 96 dpi), which leaves a transparent strip on the right and bottom edges of
+--- the page. The root element is rewritten to an exact A4 page, cropping the
+--- rounding excess, before conversion.
+local A4_PX = { 793.7008, 1122.5197 }  -- 210 x 297 mm at 96 px/in
+
+local function a4_background(src, dir)
+  local svg = read_file(path.join { ROOT, src })
+  local root = svg:match('<svg%s.->')
+  if not root then fail(src .. ' non contiene un elemento <svg>') end
+  local fixed = root
+    :gsub('%s(width)="[^"]*"', '')
+    :gsub('%s(height)="[^"]*"', '')
+    :gsub('%sviewBox="[^"]*"', '')
+    :gsub('^<svg', string.format(
+      '<svg width="210mm" height="297mm" viewBox="0 0 %s %s"', A4_PX[1], A4_PX[2]))
+  local tmp = path.join { dir, 'a4.svg' }
+  local start = svg:find(root, 1, true)
+  write_file(tmp, svg:sub(1, start - 1) .. fixed .. svg:sub(start + #root))
+  return tmp
+end
+
 function commands.assets()
   for _, name in ipairs(system.list_directory(path.join { ROOT, 'res' })) do
     local stem, ext = path.split_extension(name)
     if ext == '.svg' then
       local src, out = path.join { 'res', name }, path.join { 'res', stem .. '.pdf' }
-      run('rsvg-convert', { '-f', 'pdf', '-o', out, src })
+      if name:match('^bg%-') then
+        system.with_temporary_directory('unibs', function(dir)
+          run('rsvg-convert', { '-f', 'pdf', '-o', out, a4_background(src, dir) })
+        end)
+      else
+        run('rsvg-convert', { '-f', 'pdf', '-o', out, src })
+      end
       say('creato ' .. out)
     end
   end
