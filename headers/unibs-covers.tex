@@ -80,8 +80,8 @@
 \unibsCoverStyle{CcPeriod}      {16}              {0.98}  {light}    {0}
 \unibsCoverStyle{CcDate}        {10}              {0.98}  {regular}  {0}
 % Weekly cover. Title classes: <=70 | <=120 | <=200 | longer characters.
-\unibsCoverStyle{WcTitle}       {45, 36, 29, 25}  {0.98}  {bold}     {0}
-\unibsCoverStyle{WcLabel}       {15}              {0.98}  {bold}     {0}
+\unibsCoverStyle{WcTitle}       {47, 36, 29, 25}  {1.04}  {medium}   {0}
+\unibsCoverStyle{WcLabel}       {17}              {0.98}  {medium}   {0}
 \unibsCoverStyle{WcDate}        {22}              {0.98}  {regular}  {0}
 \unibsCoverStyle{WcPeriod}      {22}              {0.98}  {regular}  {0}
 \unibsCoverStyle{WcStudent}     {17}              {0.98}  {bold}     {0}
@@ -141,20 +141,22 @@
     \node at (17.5,17.5)
       {\includegraphics[height=\unibsX]{\unibsResDir/logo-unibs.pdf}};
     % title + label: from 4X, inside the column left of the 11X divider
-    \node[text width=164mm, align=left, text=unibsBlue] at (17.5,70) {%
+    \node[text width=164mm, align=left, text=unibsBlue] at (17.5,70.22) {%
       \unibs@nohyph\unibs@style[#1]{WcTitle}#2\par
-      \vspace{2.5mm}%
+      \vspace{3.8mm}%
       \unibs@style{WcLabel}\color{unibsBlue40}\unibs@label{\unibsReportLabel}\par};
     % date and period: from 12X
     \node[text width=164mm, align=left] at (17.5,210) {%
       \unibs@style{WcDate}\color{unibsBlue}#3\par
+      \vspace{1.5mm}%
       \unibs@style{WcPeriod}\color{unibsBlue40}#4\par};
     % lower band: student and scholarship, from 15X
     \node[text width=164mm, align=left] at (17.5,260) {%
       \unibs@style{WcStudent}\color{unibsBlue}\unibsStudentName\par
-      \vspace{1.5mm}%
+      \vspace{3.8mm}%
       \unibs@style{WcScholarship}\color{unibsBlue60}%
       \unibsScholarshipType\ifx\unibsScholarshipTitle\@empty\else\
+        \vspace{1.5mm}%
         \textendash\ \unibsScholarshipTitle\fi\par};
   }%
   \clearpage
