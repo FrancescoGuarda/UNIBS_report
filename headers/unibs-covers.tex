@@ -70,14 +70,14 @@
 % =============================================================================
 %                element         size              leading  weight     tracking
 % Compendium cover. Title classes: <=40 | <=80 | <=130 | longer characters.
-\unibsCoverStyle{CcTitle}       {58, 47, 38, 31}  {0.98}  {bold}     {0}
-\unibsCoverStyle{CcYear}        {20}              {0.98}  {regular}  {0}
-\unibsCoverStyle{CcScholarship} {23}              {0.98}  {regular}  {0}
-\unibsCoverStyle{CcStudent}     {15}              {0.98}  {bold}     {0}
+\unibsCoverStyle{CcTitle}       {60, 47, 38, 31}  {0.98}  {medium}   {2}
+\unibsCoverStyle{CcYear}        {18}              {0.98}  {light}    {0}
+\unibsCoverStyle{CcScholarship} {25}              {1.19}  {light}    {0}
+\unibsCoverStyle{CcStudent}     {16}              {0.98}  {medium}   {0}
 \unibsCoverStyle{CcDepartment}  {12}              {0.98}  {regular}  {0}
 \unibsCoverStyle{CcCompany}     {12}              {0.98}  {regular}  {0}
-\unibsCoverStyle{CcLabel}       {16}              {0.98}  {bold}     {0}
-\unibsCoverStyle{CcPeriod}      {16}              {0.98}  {regular}  {0}
+\unibsCoverStyle{CcLabel}       {17}              {0.98}  {medium}   {0}
+\unibsCoverStyle{CcPeriod}      {16}              {0.98}  {light}    {0}
 \unibsCoverStyle{CcDate}        {10}              {0.98}  {regular}  {0}
 % Weekly cover. Title classes: <=70 | <=120 | <=200 | longer characters.
 \unibsCoverStyle{WcTitle}       {45, 36, 29, 25}  {0.98}  {bold}     {0}
@@ -174,17 +174,18 @@
     \node[rotate=90, anchor=base east, text=unibsBlue40] at (200,17.5)
       {\unibs@style{CcYear}\ifx\unibsAcademicYear\@empty\else A.A.\ \unibsAcademicYear\fi};
     % scholarship title, student, department, company: from 8X
-    \node[text width=131mm, align=left, text=unibsNeutral] at (17.5,140) {%
+    \node[text width=131mm, align=left, text=unibsNeutral] at (17.5,139.8) {%
       \unibs@nohyph\unibs@style{CcScholarship}\unibsScholarshipTitle\par
       \vspace{7mm}%
       \unibs@style{CcStudent}\unibsStudentName\par
-      \vspace{1.5mm}%
+      \vspace{2mm}%
       \color{unibsBlue40}%
       \unibs@style{CcDepartment}\unibsDepartmentName\par
       \ifx\unibsCompanyName\@empty\else
+        \vspace{1mm}%
         \unibs@style{CcCompany}in collaborazione con \unibsCompanyName\par\fi};
     % label + period: above the 14X divider
-    \node[text width=131mm, align=left, anchor=south west] at (17.5,238) {%
+    \node[text width=131mm, align=left, anchor=south west] at (17.5,228) {%
       \unibs@style{CcLabel}\color{unibsBlue40}\unibs@label{\unibsScholarshipType}\par
       \vspace{1mm}%
       \unibs@style{CcPeriod}\color{unibsNeutral}#3\par};
